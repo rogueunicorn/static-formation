@@ -104,7 +104,7 @@
                     "Fn::GetAtt": ["StaticBucket", "DomainName"]
                   },
                   "Id": {
-                    "Fn::Join": ["", ["S3.", {"Ref":"RootDomainName"}]]
+                    "Fn::GetAtt": ["StaticBucket", "DomainName"]
                   },
                   "CustomOriginConfig": {
                     "HTTPPort": "80",
