@@ -101,12 +101,16 @@
               "Origins" : [
                 {
                   "DomainName": {
-                    "Fn::Join": ["", [ {"Ref": "StaticBucket"}, ".s3.amazonaws.com"]]
+                    "Fn::GetAtt": ["StaticBucket", "DomainName"]
                   },
                   "Id": {
                     "Fn::Join": ["", ["S3.", {"Ref":"RootDomainName"}]]
                   },
-                  "S3OriginConfig" : {}
+                  "CustomOriginConfig": {
+                    "HTTPPort": "80",
+                    "HTTPSPort": "443",
+                    "OriginProtocolPolicy": "http-only"
+                  }
                 }
               ],
               "DefaultCacheBehavior":  {
@@ -126,6 +130,14 @@
         "WebsiteURL": {
             "Value": {"Fn::GetAtt": ["StaticBucket", "WebsiteURL"]},
             "Description": "URL for website hosted on S3"
+        },
+        "DomainName": {
+          "Value": {"Fn::GetAtt": ["StaticBucket", "DomainName"]},
+          "Description": "Domain Name for website hosted on S3"
+        },
+        "CloudFrontDistributionDomainName": {
+          "Value": {"Fn::GetAtt": ["CloudFrontDistribution", "DomainName"]},
+          "Description": "Domain Name for the CloudFront Distribution"
         }
     }
 }
