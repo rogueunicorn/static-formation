@@ -1,0 +1,131 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "RootDomainName": {
+          "Description": "Domain name for your website (example.com)",
+          "Type": "String"
+      }
+    },
+    "Resources": {
+        "StaticBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName" : {"Ref":"RootDomainName"},
+                "AccessControl": "PublicRead",
+                "WebsiteConfiguration": {
+                    "IndexDocument":"index.html",
+                    "ErrorDocument":"error.html"
+                }
+            }
+        },
+        "StaticBucketPolicy": {
+          "Type": "AWS::S3::BucketPolicy",
+          "Properties": {
+            "Bucket": {"Ref": "StaticBucket"},
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Sid": "PublicReadStaticBucketPolicy",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": "s3:GetObject",
+                    "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "StaticBucket" } , "/*" ]]}
+                  }
+                ]
+            }
+          }
+        },
+        "WWWAliasBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
+                },
+                "AccessControl": "BucketOwnerFullControl",
+                "WebsiteConfiguration": {
+                    "RedirectAllRequestsTo": {
+                        "HostName": {"Ref": "StaticBucket"}
+                    }
+                }
+            }
+        },
+        "HostedZone": {
+          "Type" : "AWS::Route53::HostedZone",
+          "Properties" : {
+            "Name": {
+              "Fn::Join": ["", [{"Ref": "RootDomainName"}, "."]]
+            }
+          }
+        },
+        "RecordSetGroup": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "DependsOn": "HostedZone",
+            "Properties": {
+                "HostedZoneId": {
+                  "Ref":  "HostedZone"
+                },
+                "Comment": "Zone apex alias.",
+                "RecordSets": [
+                    {
+                        "Name": {"Ref": "RootDomainName"},
+                        "Type": "A",
+                        "AliasTarget": {
+                            "HostedZoneId": "Z2FDTNDATAQYW2",
+                            "DNSName": {"Fn::GetAtt":["CloudFrontDistribution", "DomainName"]}
+                        }
+                    },
+                    {
+                        "Name": {
+                            "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
+                        },
+                        "Type": "CNAME",
+                        "TTL" : "900",
+                        "ResourceRecords" : [
+                            {"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}
+                        ]
+                    }
+                ]
+            }
+        },
+        "CloudFrontDistribution": {
+          "Type": "AWS::CloudFront::Distribution",
+          "DependsOn": "StaticBucket",
+          "Properties": {
+            "DistributionConfig": {
+              "Enabled": true,
+              "Aliases": [
+                { "Ref": "RootDomainName" },
+                { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]] }
+              ],
+              "Origins" : [
+                {
+                  "DomainName": {
+                    "Fn::Join": ["", [ {"Ref": "StaticBucket"}, ".s3.amazonaws.com"]]
+                  },
+                  "Id": {
+                    "Fn::Join": ["", ["S3.", {"Ref":"RootDomainName"}]]
+                  },
+                  "S3OriginConfig" : {}
+                }
+              ],
+              "DefaultCacheBehavior":  {
+                "TargetOriginId": {
+                  "Fn::Join": ["", ["S3.", {"Ref":"RootDomainName"}]]
+                },
+                "ViewerProtocolPolicy": "allow-all",
+                "ForwardedValues": {
+                   "QueryString": true
+                 }
+              }
+            }
+          }
+        }
+    },
+    "Outputs": {
+        "WebsiteURL": {
+            "Value": {"Fn::GetAtt": ["StaticBucket", "WebsiteURL"]},
+            "Description": "URL for website hosted on S3"
+        }
+    }
+}

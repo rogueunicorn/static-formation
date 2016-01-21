@@ -1,0 +1,9 @@
+{
+    "StackName": "micromanuals",
+    "Parameters": [
+        {
+          "ParameterKey": "RootDomainName",
+          "ParameterValue": "micromanuals.xyz"
+        }
+    ]
+}
