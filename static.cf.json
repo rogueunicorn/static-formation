@@ -12,11 +12,6 @@
           "AllowedValues" : ["PriceClass_All","PriceClass_200","PriceClass_100"]
       }
     },
-    "Mappings" : {
-      "RegionMap" : {
-        "us-west-2" : { "url" : ".s3-website-us-west-2.amazonaws.com"}
-      }
-    },
     "Resources": {
         "StaticBucket": {
             "Type": "AWS::S3::Bucket",
@@ -70,18 +65,87 @@
               "Fn::Join": ["", [{"Ref": "RootDomainName"}, "."]]
             }
           }
-        }        
+        },
+        "CloudFrontDistribution": {
+          "Type": "AWS::CloudFront::Distribution",
+          "DependsOn": ["HostedZone","StaticBucket"],
+          "Properties": {
+            "DistributionConfig": {
+              "Enabled": true,
+              "DefaultRootObject": "index.html",
+              "PriceClass": { "Ref": "PriceClass" },
+              "Aliases": [
+                { "Ref": "RootDomainName" },
+                { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]] }
+              ],
+              "Origins" : [
+                {
+                  "DomainName": {
+                    "Fn::Join": ["", [
+                      {"Ref":"RootDomainName"},
+                      ".s3-website-",
+                      { "Ref" : "AWS::Region" },
+                      ".amazonaws.com"
+                    ]]
+                  },
+                  "Id": {
+                    "Fn::GetAtt": ["StaticBucket", "DomainName"]
+                  },
+                  "CustomOriginConfig": {
+                    "HTTPPort": "80",
+                    "HTTPSPort": "443",
+                    "OriginProtocolPolicy": "http-only"
+                  }
+                }
+              ],
+              "DefaultCacheBehavior":  {
+                "TargetOriginId": {
+                  "Fn::GetAtt": ["StaticBucket", "DomainName"]
+                },
+                "ViewerProtocolPolicy": "allow-all",
+                "ForwardedValues": {
+                   "QueryString": true
+                 }
+              }
+            }
+          }
+        },
+        "RecordSetGroup": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "DependsOn": ["HostedZone", "CloudFrontDistribution"],
+            "Properties": {
+                "HostedZoneId": {
+                  "Ref":  "HostedZone"
+                },
+                "Comment": "Zone apex alias.",
+                "RecordSets": [
+                    {
+                        "Name": {"Ref": "RootDomainName"},
+                        "Type": "A",
+                        "AliasTarget": {
+                            "HostedZoneId": "Z2FDTNDATAQYW2",
+                            "DNSName": {"Fn::GetAtt":["CloudFrontDistribution", "DomainName"]}
+                        }
+                    },
+                    {
+                        "Name": {
+                            "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
+                        },
+                        "Type": "CNAME",
+                        "TTL" : "900",
+                        "ResourceRecords" : [
+                            {"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}
+                        ]
+                    }
+                ]
+            }
+        }
     },
     "Outputs": {
       "WebsiteURL": {
           "Value": {"Fn::GetAtt": ["StaticBucket", "WebsiteURL"]},
           "Description": "URL for website hosted on S3"
       },
-      "DomainName": {
-        "Value": {"Fn::GetAtt": ["StaticBucket", "DomainName"]},
-        "Description": "Domain Name for website hosted on S3"
-      },
-
       "WebsiteDomainName": {
         "Value":
         {
@@ -92,20 +156,15 @@
             ".amazonaws.com"
           ]]
         },
-        "Description": "Domain Name website hosted on S"
+        "Description": "Domain Name for the website hosted on S3"
       },
-      "WebsiteDomainNameMap": {
-        "Value":
-        {
-          "Fn::Join": ["", [
-            {"Ref":"RootDomainName"},
-            {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "url"]}
-          ]]
-        },
-        "Description": "Domain Name website hosted on S"
+      "S3DomainName": {
+        "Value": {"Fn::GetAtt": ["StaticBucket", "DomainName"]},
+        "Description": "Domain Name for the S3 Bucket"
+      },
+      "CloudFrontDistributionDomainName": {
+        "Value": {"Fn::GetAtt": ["CloudFrontDistribution", "DomainName"]},
+        "Description": "Domain Name for the CloudFront Distribution"
       }
-
-
-
     }
 }
