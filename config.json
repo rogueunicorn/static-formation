@@ -1,9 +1,13 @@
 {
-    "StackName": "micromanuals",
+    "StackName": "blahvtha",
     "Parameters": [
         {
           "ParameterKey": "RootDomainName",
-          "ParameterValue": "micromanuals.xyz"
+          "ParameterValue": "blahvtha.xyz"
+        },
+        {
+          "ParameterKey": "PriceClass",
+          "ParameterValue": "PriceClass_100"          
         }
     ]
 }
