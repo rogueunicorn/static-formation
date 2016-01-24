@@ -5,11 +5,27 @@
           "Description": "Domain name for your website (example.com)",
           "Type": "String"
       },
+      "UseCloudFront": {
+          "Description": "Determines if the site will CloudFront as a CDN.",
+          "Type": "String",
+          "Default": "true",
+          "AllowedValues" : ["true","false"]
+      },
       "PriceClass": {
           "Description": "PriceClass for CloudFront. Defaults to US & Europe regions.",
           "Type": "String",
           "Default": "PriceClass_100",
           "AllowedValues" : ["PriceClass_All","PriceClass_200","PriceClass_100"]
+      }
+    },
+    "Conditions": {
+      "CreateCloudFrontDistribution": {
+        "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
+      },
+      "DoNotCreateCloudFrontDistribution": {
+        "Fn::Not": {
+          "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
+        }
       }
     },
     "Resources": {
@@ -69,6 +85,7 @@
         "CloudFrontDistribution": {
           "Type": "AWS::CloudFront::Distribution",
           "DependsOn": ["HostedZone","StaticBucket"],
+          "Condition" : "CreateCloudFrontDistribution",
           "Properties": {
             "DistributionConfig": {
               "Enabled": true,
@@ -110,35 +127,91 @@
             }
           }
         },
-        "RecordSetGroup": {
-            "Type": "AWS::Route53::RecordSetGroup",
-            "DependsOn": ["HostedZone", "CloudFrontDistribution"],
-            "Properties": {
-                "HostedZoneId": {
-                  "Ref":  "HostedZone"
-                },
-                "Comment": "Zone apex alias.",
-                "RecordSets": [
-                    {
-                        "Name": {"Ref": "RootDomainName"},
-                        "Type": "A",
-                        "AliasTarget": {
-                            "HostedZoneId": "Z2FDTNDATAQYW2",
-                            "DNSName": {"Fn::GetAtt":["CloudFrontDistribution", "DomainName"]}
-                        }
-                    },
-                    {
-                        "Name": {
-                            "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
-                        },
-                        "Type": "CNAME",
-                        "TTL" : "900",
-                        "ResourceRecords" : [
-                            {"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}
-                        ]
-                    }
-                ]
+        "CloudFrontDistributionDomainNameRecordSet": {
+          "Type": "AWS::Route53::RecordSet",
+          "DependsOn": ["HostedZone","CloudFrontDistribution"],
+          "Condition" : "CreateCloudFrontDistribution",
+          "Properties": {
+            "Name": {"Ref": "RootDomainName"},
+            "Type": "A",
+            "AliasTarget": {
+              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "DNSName": { "Fn::GetAtt":["CloudFrontDistribution", "DomainName"]}
             }
+          }
+        },
+        "DomainNameRecordSet": {
+          "Type": "AWS::Route53::RecordSet",
+          "DependsOn": ["HostedZone"],
+          "Condition" : "DoNotCreateCloudFrontDistribution",
+          "Properties": {
+            "Name": {"Ref": "RootDomainName"},
+            "Type": "A",
+            "AliasTarget": {
+              "HostedZoneId": {"Ref":  "HostedZone"}
+              "DNSName": {
+                "Fn::Join": ["", [
+                  {"Ref":"RootDomainName"},
+                  ".s3-website-",
+                  { "Ref" : "AWS::Region" },
+                  ".amazonaws.com"
+                ]]
+              }
+            }
+          }
+        },
+        "WWWAliasRecordSet": {
+          "Type": "AWS::Route53::RecordSet",
+          "DependsOn": ["HostedZone"],
+          "Properties": {
+            "Name": { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]},
+            "Type": "CNAME",
+            "TTL" : "900",
+            "ResourceRecords" : [{"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}]
+          }
+        },
+
+        "RecordSetGroup": {
+          "Type": "AWS::Route53::RecordSetGroup",
+          "DependsOn": ["HostedZone"],
+          "Properties": {
+              "HostedZoneId": {
+                "Ref":  "HostedZone"
+              },
+              "Comment": "Zone apex alias.",
+              "RecordSets": [
+                  {
+                      "Name": {"Ref": "RootDomainName"},
+                      "Type": "A",
+                      "AliasTarget": {
+                          "HostedZoneId": "Z2FDTNDATAQYW2",
+                          "DNSName": {
+                            "Fn::If" : [
+                              "CreateCloudFrontDistribution",
+                              {"Fn::GetAtt":["CloudFrontDistribution", "DomainName"]},
+                              {
+                                "Fn::Join": ["", [
+                                  {"Ref":"RootDomainName"},
+                                  ".s3-website-",
+                                  { "Ref" : "AWS::Region" },
+                                  ".amazonaws.com"
+                                ]]
+                              }
+                            ]}
+                      }
+                  },
+                  {
+                      "Name": {
+                          "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
+                      },
+                      "Type": "CNAME",
+                      "TTL" : "900",
+                      "ResourceRecords" : [
+                          {"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}
+                      ]
+                  }
+              ]
+          }
         }
     },
     "Outputs": {
@@ -164,7 +237,8 @@
       },
       "CloudFrontDistributionDomainName": {
         "Value": {"Fn::GetAtt": ["CloudFrontDistribution", "DomainName"]},
-        "Description": "Domain Name for the CloudFront Distribution"
+        "Description": "Domain Name for the CloudFront Distribution",
+        "Condition" : "CreateCloudFrontDistribution"
       }
     }
 }
