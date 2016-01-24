@@ -18,6 +18,45 @@
           "AllowedValues" : ["PriceClass_All","PriceClass_200","PriceClass_100"]
       }
     },
+    "Mappings": {
+      "RegionMap": {
+          "us-east-1": {
+              "HostedZoneID": "Z3AQBSTGFYJSTF",
+              "WebsiteEndpoint": "s3-website-us-east-1.amazonaws.com"
+          },
+          "us-west-1": {
+              "HostedZoneID": "Z2F56UZL2M1ACD",
+              "WebsiteEndpoint": "s3-website-us-west-1.amazonaws.com"
+          },
+          "us-west-2": {
+              "HostedZoneID": "Z3BJ6K6RIION7M",
+              "WebsiteEndpoint": "s3-website-us-west-2.amazonaws.com"
+          },
+          "eu-west-1": {
+              "HostedZoneID": "Z1BKCTXD74EZPE",
+              "WebsiteEndpoint": "s3-website-eu-west-1.amazonaws.com"
+          },
+          "ap-southeast-1": {
+              "HostedZoneID": "Z3O0J2DXBE1FTB",
+              "WebsiteEndpoint": "s3-website-ap-southeast-1.amazonaws.com"
+          },
+          "ap-southeast-2": {
+              "HostedZoneID": "Z1WCIGYICN2BYD",
+              "WebsiteEndpoint": "s3-website-ap-southeast-2.amazonaws.com"
+          },
+          "ap-northeast-1": {
+              "HostedZoneID": "Z2M4EHUR26P7ZW",
+              "WebsiteEndpoint": "s3-website-ap-northeast-1.amazonaws.com"
+          },
+          "sa-east-1": {
+              "HostedZoneID": "Z31GFT0UA1I2HV",
+              "WebsiteEndpoint": "s3-website-sa-east-1.amazonaws.com"
+          },
+          "cloudfront": {
+              "HostedZoneID": "Z2FDTNDATAQYW2"
+          }
+      }
+    },
     "Conditions": {
       "CreateCloudFrontDistribution": {
         "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
@@ -147,10 +186,8 @@
           "Condition" : "DoNotCreateCloudFrontDistribution",
           "Properties": {
             "Name": {"Ref": "RootDomainName"},
-            "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
-              "HostedZoneId": {"Ref":  "HostedZone"},
               "DNSName": {
                 "Fn::Join": ["", [
                   {"Ref":"RootDomainName"},
