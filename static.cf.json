@@ -133,6 +133,7 @@
           "Condition" : "CreateCloudFrontDistribution",
           "Properties": {
             "Name": {"Ref": "RootDomainName"},
+            "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
               "HostedZoneId": "Z2FDTNDATAQYW2",
@@ -146,6 +147,7 @@
           "Condition" : "DoNotCreateCloudFrontDistribution",
           "Properties": {
             "Name": {"Ref": "RootDomainName"},
+            "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
               "HostedZoneId": {"Ref":  "HostedZone"},
@@ -165,6 +167,7 @@
           "DependsOn": ["HostedZone"],
           "Properties": {
             "Name": { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]},
+            "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "CNAME",
             "TTL" : "900",
             "ResourceRecords" : [{"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}]
