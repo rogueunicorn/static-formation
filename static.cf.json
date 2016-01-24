@@ -169,49 +169,6 @@
             "TTL" : "900",
             "ResourceRecords" : [{"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}]
           }
-        },
-
-        "RecordSetGroup": {
-          "Type": "AWS::Route53::RecordSetGroup",
-          "DependsOn": ["HostedZone"],
-          "Properties": {
-              "HostedZoneId": {
-                "Ref":  "HostedZone"
-              },
-              "Comment": "Zone apex alias.",
-              "RecordSets": [
-                  {
-                      "Name": {"Ref": "RootDomainName"},
-                      "Type": "A",
-                      "AliasTarget": {
-                          "HostedZoneId": "Z2FDTNDATAQYW2",
-                          "DNSName": {
-                            "Fn::If" : [
-                              "CreateCloudFrontDistribution",
-                              {"Fn::GetAtt":["CloudFrontDistribution", "DomainName"]},
-                              {
-                                "Fn::Join": ["", [
-                                  {"Ref":"RootDomainName"},
-                                  ".s3-website-",
-                                  { "Ref" : "AWS::Region" },
-                                  ".amazonaws.com"
-                                ]]
-                              }
-                            ]}
-                      }
-                  },
-                  {
-                      "Name": {
-                          "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
-                      },
-                      "Type": "CNAME",
-                      "TTL" : "900",
-                      "ResourceRecords" : [
-                          {"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}
-                      ]
-                  }
-              ]
-          }
         }
     },
     "Outputs": {
