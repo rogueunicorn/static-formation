@@ -23,9 +23,9 @@
         "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
       },
       "DoNotCreateCloudFrontDistribution": {
-        "Fn::Not": {
+        "Fn::Not": [{
           "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
-        }
+        }]
       }
     },
     "Resources": {
@@ -148,7 +148,7 @@
             "Name": {"Ref": "RootDomainName"},
             "Type": "A",
             "AliasTarget": {
-              "HostedZoneId": {"Ref":  "HostedZone"}
+              "HostedZoneId": {"Ref":  "HostedZone"},
               "DNSName": {
                 "Fn::Join": ["", [
                   {"Ref":"RootDomainName"},
