@@ -21,39 +21,39 @@
     "Mappings": {
       "RegionMap": {
           "us-east-1": {
-              "HostedZoneID": "Z3AQBSTGFYJSTF",
+              "HostedZoneId": "Z3AQBSTGFYJSTF",
               "WebsiteEndpoint": "s3-website-us-east-1.amazonaws.com"
           },
           "us-west-1": {
-              "HostedZoneID": "Z2F56UZL2M1ACD",
+              "HostedZoneId": "Z2F56UZL2M1ACD",
               "WebsiteEndpoint": "s3-website-us-west-1.amazonaws.com"
           },
           "us-west-2": {
-              "HostedZoneID": "Z3BJ6K6RIION7M",
+              "HostedZoneId": "Z3BJ6K6RIION7M",
               "WebsiteEndpoint": "s3-website-us-west-2.amazonaws.com"
           },
           "eu-west-1": {
-              "HostedZoneID": "Z1BKCTXD74EZPE",
+              "HostedZoneId": "Z1BKCTXD74EZPE",
               "WebsiteEndpoint": "s3-website-eu-west-1.amazonaws.com"
           },
           "ap-southeast-1": {
-              "HostedZoneID": "Z3O0J2DXBE1FTB",
+              "HostedZoneId": "Z3O0J2DXBE1FTB",
               "WebsiteEndpoint": "s3-website-ap-southeast-1.amazonaws.com"
           },
           "ap-southeast-2": {
-              "HostedZoneID": "Z1WCIGYICN2BYD",
+              "HostedZoneId": "Z1WCIGYICN2BYD",
               "WebsiteEndpoint": "s3-website-ap-southeast-2.amazonaws.com"
           },
           "ap-northeast-1": {
-              "HostedZoneID": "Z2M4EHUR26P7ZW",
+              "HostedZoneId": "Z2M4EHUR26P7ZW",
               "WebsiteEndpoint": "s3-website-ap-northeast-1.amazonaws.com"
           },
           "sa-east-1": {
-              "HostedZoneID": "Z31GFT0UA1I2HV",
+              "HostedZoneId": "Z31GFT0UA1I2HV",
               "WebsiteEndpoint": "s3-website-sa-east-1.amazonaws.com"
           },
-          "cloudfront": {
-              "HostedZoneID": "Z2FDTNDATAQYW2"
+          "CloudFront": {
+              "HostedZoneId": "Z2FDTNDATAQYW2"
           }
       }
     },
@@ -175,7 +175,9 @@
             "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
-              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "HostedZoneId": {
+                "Fn::FindInMap" : [ "RegionMap", "CloudFront", "HostedZoneId"]
+              },
               "DNSName": { "Fn::GetAtt":["CloudFrontDistribution", "DomainName"]}
             }
           }
@@ -188,6 +190,9 @@
             "Name": {"Ref": "RootDomainName"},
             "Type": "A",
             "AliasTarget": {
+              "HostedZoneId": {
+                "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "HostedZoneId"]
+              },
               "DNSName": {
                 "Fn::Join": ["", [
                   {"Ref":"RootDomainName"},
@@ -221,9 +226,8 @@
         {
           "Fn::Join": ["", [
             {"Ref":"RootDomainName"},
-            ".s3-website-",
-            { "Ref" : "AWS::Region" },
-            ".amazonaws.com"
+            ".",
+            {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "HostedZoneId"]}
           ]]
         },
         "Description": "Domain Name for the website hosted on S3"
