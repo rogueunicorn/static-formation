@@ -198,11 +198,7 @@
                 "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "HostedZoneId"]
               },
               "DNSName": {
-                "Fn::Join": ["", [
-                  {"Ref":"RootDomainName"},
-                  ".",
-                  {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
-                ]]
+                "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]
               }
             }
           }
@@ -217,7 +213,7 @@
             "TTL" : "900",
             "ResourceRecords" : [
               {"Fn::Join": ["", [
-                "www."
+                "www.",
                 {"Ref":"RootDomainName"},
                 ".",
                 {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
