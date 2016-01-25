@@ -65,6 +65,9 @@
         "Fn::Not": [{
           "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
         }]
+      },
+      "DoNotCloud": {
+        "Fn::Equals": ["true", "true"]
       }
     },
     "Resources": {
@@ -185,9 +188,10 @@
         "DomainNameRecordSet": {
           "Type": "AWS::Route53::RecordSet",
           "DependsOn": ["HostedZone"],
-          "Condition" : "DoNotCreateCloudFrontDistribution",
+          "Condition" : "DoNotCloud",
           "Properties": {
             "Name": {"Ref": "RootDomainName"},
+            "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
               "HostedZoneId": {
@@ -196,9 +200,8 @@
               "DNSName": {
                 "Fn::Join": ["", [
                   {"Ref":"RootDomainName"},
-                  ".s3-website-",
-                  { "Ref" : "AWS::Region" },
-                  ".amazonaws.com"
+                  ".",
+                  {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
                 ]]
               }
             }
@@ -212,7 +215,14 @@
             "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "CNAME",
             "TTL" : "900",
-            "ResourceRecords" : [{"Fn::GetAtt":["WWWAliasBucket", "DomainName"]}]
+            "ResourceRecords" : [
+              {"Fn::Join": ["", [
+                "www."
+                {"Ref":"RootDomainName"},
+                ".",
+                {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
+              ]]}
+            ]
           }
         }
     },
@@ -227,7 +237,7 @@
           "Fn::Join": ["", [
             {"Ref":"RootDomainName"},
             ".",
-            {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "HostedZoneId"]}
+            {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
           ]]
         },
         "Description": "Domain Name for the website hosted on S3"
