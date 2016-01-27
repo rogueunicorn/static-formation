@@ -10,6 +10,10 @@
           "ParameterValue": "PriceClass_100"
         },
         {
+            "ParameterKey": "UseRoute53",
+            "ParameterValue": "false"
+        },
+        {
             "ParameterKey": "UseCloudFront",
             "ParameterValue": "false"
         }

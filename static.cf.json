@@ -11,6 +11,12 @@
           "Default": "true",
           "AllowedValues" : ["true","false"]
       },
+      "UseRoute53": {
+          "Description": "Determines if the site will Route53 for DNS.",
+          "Type": "String",
+          "Default": "true",
+          "AllowedValues" : ["true","false"]
+      },
       "PriceClass": {
           "Description": "PriceClass for CloudFront. Defaults to US & Europe regions.",
           "Type": "String",
@@ -66,6 +72,9 @@
           "Fn::Equals": [{"Ref": "UseCloudFront"}, "true"]
         }]
       },
+      "CreateRoute53": {
+        "Fn::Equals": [{"Ref": "UseRoute53"}, "true"]
+      },
       "DoNotCloud": {
         "Fn::Equals": ["true", "true"]
       }
@@ -118,7 +127,8 @@
         },
         "HostedZone": {
           "Type" : "AWS::Route53::HostedZone",
-          "Properties" : {
+          "Condition": "CreateRoute53",
+          "Properties": {
             "Name": {
               "Fn::Join": ["", [{"Ref": "RootDomainName"}, "."]]
             }
@@ -188,7 +198,7 @@
         "DomainNameRecordSet": {
           "Type": "AWS::Route53::RecordSet",
           "DependsOn": ["HostedZone"],
-          "Condition" : "DoNotCloud",
+          "Condition": "CreateRoute53",
           "Properties": {
             "Name": {"Ref": "RootDomainName"},
             "HostedZoneId": {"Ref":  "HostedZone"},
@@ -206,6 +216,7 @@
         "WWWAliasRecordSet": {
           "Type": "AWS::Route53::RecordSet",
           "DependsOn": ["HostedZone"],
+          "Condition": "CreateRoute53",
           "Properties": {
             "Name": { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]},
             "HostedZoneId": {"Ref":  "HostedZone"},
