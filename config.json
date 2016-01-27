@@ -1,9 +1,9 @@
 {
-    "StackName": "blahvtha",
+    "StackName": "micromanual",
     "Parameters": [
         {
           "ParameterKey": "DomainName",
-          "ParameterValue": "blahvtha.xyz"
+          "ParameterValue": "micromanuals.xyz"
         },
         {
             "ParameterKey": "UseRoute53",
