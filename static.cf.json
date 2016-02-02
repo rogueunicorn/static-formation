@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-      "RootDomainName": {
+      "DomainName": {
           "Description": "Domain name for your website (example.com)",
           "Type": "String"
       },
@@ -83,7 +83,7 @@
         "StaticBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "BucketName" : {"Ref":"RootDomainName"},
+                "BucketName" : {"Ref":"DomainName"},
                 "AccessControl": "PublicRead",
                 "WebsiteConfiguration": {
                     "IndexDocument":"index.html",
@@ -116,7 +116,7 @@
           "Condition": "CreateRoute53",
           "Properties": {
               "BucketName": {
-                  "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]
+                  "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]
               },
               "AccessControl": "BucketOwnerFullControl",
               "WebsiteConfiguration": {
@@ -131,7 +131,7 @@
           "Condition": "CreateRoute53",
           "Properties": {
             "Name": {
-              "Fn::Join": ["", [{"Ref": "RootDomainName"}, "."]]
+              "Fn::Join": ["", [{"Ref": "DomainName"}, "."]]
             }
           }
         },
@@ -145,14 +145,14 @@
               "DefaultRootObject": "index.html",
               "PriceClass": { "Ref": "PriceClass" },
               "Aliases": [
-                { "Ref": "RootDomainName" },
-                { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]] }
+                { "Ref": "DomainName" },
+                { "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]] }
               ],
               "Origins" : [
                 {
                   "DomainName": {
                     "Fn::Join": ["", [
-                      {"Ref":"RootDomainName"},
+                      {"Ref":"DomainName"},
                       ".s3-website-",
                       { "Ref" : "AWS::Region" },
                       ".amazonaws.com"
@@ -185,7 +185,7 @@
           "DependsOn": ["HostedZone","CloudFrontDistribution"],
           "Condition" : "CreateCloudFrontDistribution",
           "Properties": {
-            "Name": {"Ref": "RootDomainName"},
+            "Name": {"Ref": "DomainName"},
             "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
@@ -201,7 +201,7 @@
           "DependsOn": ["HostedZone"],
           "Condition": "CreateRoute53",
           "Properties": {
-            "Name": {"Ref": "RootDomainName"},
+            "Name": {"Ref": "DomainName"},
             "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "A",
             "AliasTarget": {
@@ -219,14 +219,14 @@
           "DependsOn": ["HostedZone"],
           "Condition": "CreateRoute53",
           "Properties": {
-            "Name": { "Fn::Join": ["", ["www.", {"Ref":"RootDomainName"}]]},
+            "Name": { "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]},
             "HostedZoneId": {"Ref":  "HostedZone"},
             "Type": "CNAME",
             "TTL" : "900",
             "ResourceRecords" : [
               {"Fn::Join": ["", [
                 "www.",
-                {"Ref":"RootDomainName"},
+                {"Ref":"DomainName"},
                 ".",
                 {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
               ]]}
@@ -243,7 +243,7 @@
         "Value":
         {
           "Fn::Join": ["", [
-            {"Ref":"RootDomainName"},
+            {"Ref":"DomainName"},
             ".",
             {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "WebsiteEndpoint"]}
           ]]

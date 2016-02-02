@@ -2,12 +2,8 @@
     "StackName": "blahvtha",
     "Parameters": [
         {
-          "ParameterKey": "RootDomainName",
+          "ParameterKey": "DomainName",
           "ParameterValue": "blahvtha.xyz"
-        },
-        {
-          "ParameterKey": "PriceClass",
-          "ParameterValue": "PriceClass_100"
         },
         {
             "ParameterKey": "UseRoute53",
@@ -16,6 +12,10 @@
         {
             "ParameterKey": "UseCloudFront",
             "ParameterValue": "false"
+        },
+        {
+          "ParameterKey": "PriceClass",
+          "ParameterValue": "PriceClass_100"
         }
     ]
 }
