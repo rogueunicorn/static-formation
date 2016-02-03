@@ -1,0 +1,20 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1449904348000",
+            "Effect": "Allow",
+            "Action": [
+              "cloudformation:CreateStack",
+              "cloudformation:DescribeStacks",
+              "cloudformation:DescribeStackEvents",
+              "cloudformation:DescribeStackResources",
+              "cloudformation:GetTemplate",
+              "cloudformation:ValidateTemplate"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
