@@ -7,11 +7,11 @@
         },
         {
             "ParameterKey": "UseRoute53",
-            "ParameterValue": "false"
+            "ParameterValue": "true"
         },
         {
             "ParameterKey": "UseCloudFront",
-            "ParameterValue": "false"
+            "ParameterValue": "true"
         },
         {
           "ParameterKey": "PriceClass",

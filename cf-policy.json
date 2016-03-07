@@ -6,6 +6,8 @@
             "Effect": "Allow",
             "Action": [
               "cloudformation:CreateStack",
+              "cloudformation:UpdateStack",
+              "cloudformation:DeleteStack",
               "cloudformation:DescribeStacks",
               "cloudformation:DescribeStackEvents",
               "cloudformation:DescribeStackResources",
