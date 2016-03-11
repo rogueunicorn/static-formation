@@ -7,7 +7,7 @@
         },
         {
             "ParameterKey": "UseRoute53",
-            "ParameterValue": "true"
+            "ParameterValue": "false"
         },
         {
             "ParameterKey": "UseCloudFront",

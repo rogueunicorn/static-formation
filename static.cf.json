@@ -113,7 +113,6 @@
         "WWWAliasBucket": {
           "Type": "AWS::S3::Bucket",
           "DependsOn": "StaticBucket",
-          "Condition": "CreateRoute53",
           "Properties": {
               "BucketName": {
                   "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]
@@ -216,7 +215,7 @@
         },
         "WWWAliasRecordSet": {
           "Type": "AWS::Route53::RecordSet",
-          "DependsOn": ["HostedZone"],
+
           "Condition": "CreateRoute53",
           "Properties": {
             "Name": { "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]},
