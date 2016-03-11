@@ -137,7 +137,7 @@
         },
         "CloudFrontDistribution": {
           "Type": "AWS::CloudFront::Distribution",
-          "DependsOn": ["HostedZone","StaticBucket"],
+          "DependsOn": ["StaticBucket"],
           "Condition" : "CreateCloudFrontDistribution",
           "Properties": {
             "DistributionConfig": {
