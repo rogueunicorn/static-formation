@@ -136,7 +136,7 @@
         },
         "CloudFrontDistribution": {
           "Type": "AWS::CloudFront::Distribution",
-          "DependsOn": ["HostedZone","StaticBucket"],
+          "DependsOn": ["StaticBucket"],
           "Condition" : "CreateCloudFrontDistribution",
           "Properties": {
             "DistributionConfig": {
@@ -215,7 +215,7 @@
         },
         "WWWAliasRecordSet": {
           "Type": "AWS::Route53::RecordSet",
-
+          "DependsOn": ["HostedZone"],
           "Condition": "CreateRoute53",
           "Properties": {
             "Name": { "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]},
