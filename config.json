@@ -11,7 +11,7 @@
         },
         {
             "ParameterKey": "UseCloudFront",
-            "ParameterValue": "true"
+            "ParameterValue": "false"
         },
         {
           "ParameterKey": "PriceClass",
