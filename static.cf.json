@@ -6,13 +6,13 @@
           "Type": "String"
       },
       "UseCloudFront": {
-          "Description": "Determines if the site will CloudFront as a CDN.",
+          "Description": "Determines if the site will use CloudFront as a CDN.",
           "Type": "String",
           "Default": "true",
           "AllowedValues" : ["true","false"]
       },
       "UseRoute53": {
-          "Description": "Determines if the site will Route53 for DNS.",
+          "Description": "Determines if the site will use Route53 for DNS.",
           "Type": "String",
           "Default": "true",
           "AllowedValues" : ["true","false"]
